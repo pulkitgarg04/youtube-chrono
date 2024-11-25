@@ -1,10 +1,43 @@
 import React, { useState } from "react";
 
 interface Video {
+  id: string;
   title: string;
   duration: string;
   formattedDuration: string;
   thumbnail: string;
+}
+
+interface PlaylistItemResponse {
+  items: {
+    contentDetails: {
+      videoId: string
+    };
+    snippet: {
+      title: string;
+      thumbnails: {
+        high: {
+          url: string
+        }
+      }
+    };
+  }[];
+  nextPageToken?: string;
+}
+
+interface VideoDetailsResponse {
+  items: {
+    id: string;
+    snippet: {
+      title: string;
+      thumbnails: {
+        high: {
+          url: string
+        }
+      }
+    };
+    contentDetails: { duration: string };
+  }[];
 }
 
 const App: React.FC = () => {
@@ -39,57 +72,29 @@ const App: React.FC = () => {
         const response = await fetch(
           `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&maxResults=50&playlistId=${playlistId}&pageToken=${nextPageToken}&key=${API_KEY}`
         );
-
-        if (!response.ok) {
-          console.error("Failed to fetch playlist items:", response.statusText);
-          break;
-        }
-
-        const data = await response.json();
-
-        if (!data.items || data.items.length === 0) {
-          console.error("No items found in response:", data);
-          break;
-        }
+        const data: PlaylistItemResponse = await response.json();
 
         nextPageToken = data.nextPageToken;
 
         const videoIds = data.items
-          .map((item: any) => item.contentDetails?.videoId)
-          .filter((id: string | undefined) => id)
+          .map((item) => item.contentDetails.videoId)
           .join(",");
 
-        if (!videoIds) {
-          console.error("No video IDs found in current page:", data.items);
-          continue;
-        }
-
-        const videoResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds}&key=${API_KEY}`
-        );
-
-        if (!videoResponse.ok) {
-          console.error(
-            "Failed to fetch video details:",
-            videoResponse.statusText
+        if (videoIds) {
+          const videoResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds}&key=${API_KEY}`
           );
-          break;
+          const videoData: VideoDetailsResponse = await videoResponse.json();
+
+          const fetchedVideos = videoData.items.map((item) => ({
+            id: item.id,
+            title: item.snippet.title,
+            duration: item.contentDetails.duration,
+            formattedDuration: formatDuration(item.contentDetails.duration),
+            thumbnail: item.snippet.thumbnails.high.url,
+          }));
+          allVideos = [...allVideos, ...fetchedVideos];
         }
-
-        const videoData = await videoResponse.json();
-
-        if (!videoData.items || videoData.items.length === 0) {
-          console.error("No video details found in response:", videoData);
-          break;
-        }
-
-        const fetchedVideos = videoData.items.map((item: any) => ({
-          title: item.snippet.title,
-          duration: item.contentDetails.duration,
-          formattedDuration: formatDuration(item.contentDetails.duration),
-          thumbnail: item.snippet.thumbnails.high?.url,
-        }));
-        allVideos = [...allVideos, ...fetchedVideos];
       } while (nextPageToken);
 
       setVideos(allVideos);
@@ -134,7 +139,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center bg-[url('https://static.soapcentral.com/editor/2024/09/dc884-17262004042678.jpg')] text-white">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-xl">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <h1 className="text-2xl font-bold text-center mb-4">YouTube Chrono</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -162,17 +167,27 @@ const App: React.FC = () => {
             <h2 className="text-lg font-bold">Video Details:</h2>
             <ul className="space-y-4">
               {videos.map((video, index) => (
-                <li key={index} className="flex items-center space-x-4 border-b py-2">
+                <li
+                key={index}
+                className="flex items-center space-x-4 border-b py-2"
+              >
+                <a
+                  href={`https://youtu.be/${video.id}?feature=shared`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-4 w-full"
+                >
                   <img
                     src={video.thumbnail}
                     alt={`${video.title} Thumbnail`}
-                    className="w-32 h-20 rounded-lg object-cover"
+                    className="w-40 h-24 rounded-lg object-cover flex-shrink-0"
                   />
-                  <div>
-                    <div className="font-bold">{video.title}</div>
-                    <div className="text-gray-300">{video.formattedDuration}</div>
+                  <div className="flex-grow">
+                    <div className="font-bold text-lg">{video.title}</div>
+                    <div className="text-gray-300 text-sm">{video.formattedDuration}</div>
                   </div>
-                </li>
+                </a>
+              </li>              
               ))}
             </ul>
           </div>
