@@ -22,7 +22,7 @@ const Main: React.FC = () => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${hours}h ${minutes}m ${secs}s`;
+    return `${hours} hours ${minutes} minutes ${secs} seconds`;
   };
 
   const fetchPlaylistDetails = async (playlistId: string) => {
@@ -126,9 +126,9 @@ const Main: React.FC = () => {
 
           {playlistInfo && (
             <div className="mt-6 space-y-4 text-lg">
-              <h2 className="font-bold">Playlist: {playlistInfo.title}</h2>
-              <p>ID: {playlistInfo.id}</p>
-              <p>Creator: {playlistInfo.creator}</p>
+              <h2 className="font-bold truncate">Playlist: {playlistInfo.title}</h2>
+              <p className="truncate">ID: {playlistInfo.id}</p>
+              <p className="truncate">Creator: {playlistInfo.creator}</p>
               <p>
                 Video count: {playlistInfo.videoCount} (from{" "}
                 {playlistInfo.videoRange}) (0 unavailable)
