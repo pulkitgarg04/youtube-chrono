@@ -1,9 +1,26 @@
 import React, { useState } from "react";
 
+interface PlaylistInfo {
+  title: string;
+  id: string;
+  creator: string;
+  videoCount: number;
+  videoRange: string;
+  averageDuration: string;
+  totalDuration: string;
+  speeds: {
+    "1.25x": string;
+    "1.50x": string;
+    "1.75x": string;
+    "2.00x": string;
+  };
+}
+
 const Main: React.FC = () => {
   const [playlistLink, setPlaylistLink] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [playlistInfo, setPlaylistInfo] = useState<any>(null);
+  const [playlistInfo, setPlaylistInfo] = useState<PlaylistInfo | null>(null);
+  const [error, setError] = useState<string>("");
 
   const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
@@ -27,28 +44,35 @@ const Main: React.FC = () => {
 
   const fetchPlaylistDetails = async (playlistId: string) => {
     setLoading(true);
+    setError("");  // Clear previous errors
     try {
       const playlistResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${API_KEY}`
       );
       const playlistData = await playlistResponse.json();
-  
+
+      if (playlistData.items.length === 0) {
+        setError("Playlist not found or invalid.");
+        setLoading(false);
+        return;
+      }
+
       const playlistTitle = playlistData.items[0]?.snippet?.title || "Untitled Playlist";
 
       const videoResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}`
       );
       const videoData = await videoResponse.json();
-  
+
       const videos = videoData.items.map((item: any) => ({
         id: item.contentDetails.videoId,
         title: item.snippet.title,
         creator: item.snippet.channelTitle,
       }));
-  
+
       const totalDurationSeconds = await fetchVideoDurations(videos);
       const averageSeconds = totalDurationSeconds / videos.length;
-  
+
       setPlaylistInfo({
         title: playlistTitle,
         id: playlistId,
@@ -66,10 +90,10 @@ const Main: React.FC = () => {
       });
     } catch (error) {
       console.error("Error fetching playlist details:", error);
+      setError("An error occurred while fetching the playlist details.");
     }
     setLoading(false);
   };
-  
 
   const fetchVideoDurations = async (videos: any[]) => {
     const videoIds = videos.map((video) => video.id).join(",");
@@ -90,7 +114,7 @@ const Main: React.FC = () => {
     if (playlistIdMatch) {
       fetchPlaylistDetails(playlistIdMatch[1]);
     } else {
-      alert("Invalid playlist URL");
+      setError("Invalid playlist URL.");
     }
   };
 
@@ -124,7 +148,11 @@ const Main: React.FC = () => {
             {loading ? "Calculating..." : "Calculate Duration ⏱️"}
           </button>
 
-          {playlistInfo && (
+          {error && (
+            <p className="text-red-500 text-center">{error}</p>
+          )}
+
+          {playlistInfo && !error && (
             <div className="mt-6 space-y-4 text-lg">
               <h2 className="font-bold truncate">Playlist: {playlistInfo.title}</h2>
               <p className="truncate">ID: {playlistInfo.id}</p>
