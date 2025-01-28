@@ -17,7 +17,7 @@ YouTube Chrono is an online tool that calculates the total duration of a YouTube
 ### Steps
 1. Clone this repository:
 ```bash
-git clone https://github.com/your-username/YouTube-Chrono.git 
+git clone https://github.com/pulkitgarg04/YouTube-Chrono.git 
 ```
 
 2. Navigate to the project folder:
