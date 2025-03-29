@@ -76,7 +76,17 @@ export default function Home() {
       )
       const videoData = await videoResponse.json()
 
-      const videos = videoData.items.map((item: any) => ({
+      interface VideoItem {
+        contentDetails: {
+          videoId: string;
+        };
+        snippet: {
+          title: string;
+          channelTitle: string;
+        };
+      }
+
+      const videos = videoData.items.map((item: VideoItem) => ({
         id: item.contentDetails.videoId,
         title: item.snippet.title,
         creator: item.snippet.channelTitle,
@@ -117,13 +127,25 @@ export default function Home() {
     setLoading(false)
   }
 
-  const fetchVideoDurations = async (videos: any[]) => {
+  interface Video {
+    id: string;
+    title: string;
+    creator: string;
+  }
+
+  const fetchVideoDurations = async (videos: Video[]) => {
     const videoIds = videos.map((video) => video.id).join(",")
     const videoResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds}&key=${API_KEY}`,
     )
     const videoData = await videoResponse.json()
-    return videoData.items.reduce((sum: number, video: any) => sum + formatDuration(video.contentDetails.duration), 0)
+    interface VideoDetails {
+      contentDetails: {
+        duration: string;
+      };
+    }
+
+    return videoData.items.reduce((sum: number, video: VideoDetails) => sum + formatDuration(video.contentDetails.duration), 0)
   }
 
   const handleSubmit = (e: React.FormEvent) => {

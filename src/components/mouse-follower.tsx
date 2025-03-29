@@ -73,7 +73,7 @@ export default function MouseFollower() {
         animate={cursorVariant}
         transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.5 }}
       />
-      <style jsx global>{`
+      <style>{`
         @media (max-width: 768px) {
           body {
             cursor: auto;
