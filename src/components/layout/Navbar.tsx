@@ -1,22 +1,14 @@
-import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Moon, Sun, Youtube, Github } from "lucide-react"
+import { Youtube, Github } from "lucide-react"
+import ThemeToggle from "../ui/theme-toggle"
 
 export default function Navbar() {
-  const [darkMode, setDarkMode] = useState(true)
-
-  useEffect(() => {
-    document.documentElement.classList.add("dark")
-  }, [])
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
-    document.documentElement.classList.toggle("dark", !darkMode)
-  }
-
   return (
     <motion.nav
-      className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-6 bg-zinc-900/80 backdrop-blur-md text-white border-b border-zinc-800 z-50"
+      className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-6 
+                 bg-zinc-900/80 text-white border-b border-zinc-800 
+                 backdrop-blur-md z-50 
+                 dark:bg-zinc-50 dark:text-zinc-900 dark:border-zinc-200"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
@@ -35,19 +27,13 @@ export default function Navbar() {
       </motion.div>
 
       <div className="flex items-center space-x-4">
-        <motion.button
-          onClick={toggleDarkMode}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors duration-200 glow-element"
-          whileHover={{ scale: 1.1, rotate: 15 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {darkMode ? <Moon size={20} /> : <Sun size={20} />}
-        </motion.button>
+        <ThemeToggle />
         <motion.a
           href="https://github.com/pulkitgarg04/youtube-chrono"
           target="_blank"
           rel="noopener noreferrer"
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors duration-200 glow-element"
+          className="p-2 rounded-full transition-colors duration-200 glow-element
+                     hover:bg-zinc-800 dark:hover:bg-zinc-200 dark:text-zinc-800"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >

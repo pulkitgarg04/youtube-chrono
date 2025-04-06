@@ -1,6 +1,6 @@
-import Navbar from "./components/Navbar";
+import Navbar from "./components/layout/Navbar";
 import Main from "./components/Main";
-import Footer from "./components/Footer";
+import Footer from "./components/layout/Footer";
 
 const App: React.FC = () => {
   return (
