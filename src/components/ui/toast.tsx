@@ -43,14 +43,21 @@ export default function Toast({ message, type, isVisible, onClose }: ToastProps)
           exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
         >
-          <div className={`flex items-center p-4 rounded-lg shadow-lg ${getToastColor()} text-white`}>
+          <div
+            className={`flex items-center p-4 rounded-lg shadow-lg text-sm font-medium 
+          ${getToastColor()} text-zinc-800 dark:text-zinc-100`}
+          >
             <div className="flex-1 mr-2">{message}</div>
-            <button onClick={onClose} className="p-1 rounded-full hover:bg-white/20 transition-colors">
+            <button
+              onClick={onClose}
+              className="p-1 rounded-full hover:bg-zinc-200/50 dark:hover:bg-white/20 transition-colors"
+            >
               <X size={16} />
             </button>
           </div>
         </motion.div>
       )}
     </AnimatePresence>
+
   )
 }
